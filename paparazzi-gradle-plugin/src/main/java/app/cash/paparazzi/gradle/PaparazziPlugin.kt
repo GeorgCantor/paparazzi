@@ -15,8 +15,8 @@
  */
 package app.cash.paparazzi.gradle
 
-import app.cash.paparazzi.gradle.utils.registerGeneratePreviewTask
 import app.cash.paparazzi.gradle.utils.artifactViewFor
+import app.cash.paparazzi.gradle.utils.registerGeneratePreviewTask
 import app.cash.paparazzi.gradle.utils.relativize
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
@@ -24,13 +24,6 @@ import com.android.build.api.variant.DynamicFeatureAndroidComponentsExtension
 import com.android.build.api.variant.HasUnitTest
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.TestedExtension
-import com.android.build.gradle.api.BaseVariant
-import com.android.build.gradle.internal.api.TestedVariant
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
-import com.android.build.gradle.internal.dsl.DynamicFeatureExtension
-import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType
 import com.google.devtools.ksp.gradle.KspExtension
 import com.google.devtools.ksp.gradle.KspGradleSubplugin
 import org.gradle.api.DefaultTask
@@ -42,6 +35,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.artifacts.transform.UnzipTransform
 import org.gradle.api.logging.LogLevel.LIFECYCLE
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.reporting.ReportingExtension
@@ -93,7 +87,7 @@ public class PaparazziPlugin @Inject constructor(
           else -> error("${androidComponents.javaClass.name} from $plugin is not supported in Paparazzi")
         }
         setupPaparazzi(project, androidComponents)
-        setupPreviewProcessor(project, variants)
+        setupPreviewProcessor(project)
       }
     }
   }
@@ -267,10 +261,9 @@ public class PaparazziPlugin @Inject constructor(
     }
   }
 
-  private fun <T> setupPreviewProcessor(
+  private fun setupPreviewProcessor(
     project: Project,
-    variants: DomainObjectSet<T>
-  ) where T : BaseVariant, T : TestedVariant {
+  ) {
     project.pluginManager.apply(KspGradleSubplugin::class.java)
 
     project.addAnnotationsDependency()
@@ -281,8 +274,8 @@ public class PaparazziPlugin @Inject constructor(
       val kspExtension = project.extensions.getByType(KspExtension::class.java)
       val android = project.extensions.getByType(BaseExtension::class.java)
       kspExtension.arg(KSP_ARG_NAMESPACE, android.packageName())
-
-      project.registerGeneratePreviewTask(variants, config)
+      
+      project.registerGeneratePreviewTask(config)
     }
   }
 
