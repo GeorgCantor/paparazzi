@@ -20,7 +20,7 @@ internal object PaparazziPoet {
       listOf(
         buildAnnotationsFile(
           fileName = "PaparazziPreviews",
-          propertyName = "paparazziPreviews",
+          propertyName = "PaparazziPreviews", "paparazziPreviews",
           functions = functions,
           env = env
         )
