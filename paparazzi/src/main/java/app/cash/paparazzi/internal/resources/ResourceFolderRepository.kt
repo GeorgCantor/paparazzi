@@ -62,16 +62,12 @@ internal class ResourceFolderRepository(
     get() = Paths.get(resourceDir.path)
 
   override fun getResourceUrl(relativeResourcePath: String): String =
-    "$resourcePathPrefix$relativeResourcePath".apply {
-      println("getResourceUrl $this")
-    }
+    "$resourcePathPrefix$relativeResourcePath"
 
   override fun getSourceFile(
     relativeResourcePath: String,
     forFileResource: Boolean
-  ): PathString = resourcePathBase.resolve(relativeResourcePath).apply {
-    println("getSourceFile $relativeResourcePath")
-  }
+  ): PathString = resourcePathBase.resolve(relativeResourcePath)
 
   override fun getPackageName(): String? = namespace.packageName
 
@@ -196,7 +192,6 @@ internal class ResourceFolderRepository(
       folderInfo: FolderInfo,
       configuration: RepositoryConfiguration
     ) {
-      println("loadResourceFile $file $folderInfo")
       if (folderInfo.resourceType == null) {
         if (isXmlFile(file)) {
           parseValueResourceFile(file, configuration)

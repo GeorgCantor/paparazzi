@@ -58,8 +58,8 @@ internal class ResourcesCompatTransform(api: Int, delegate: ClassVisitor) : Clas
     }
 
     override fun visitLdcInsn(value: Any?) {
-      if (value == "res/" && File.separator == "\\") {
-        super.visitLdcInsn("res\\")
+      if (value == "res/") {
+        super.visitLdcInsn("res" + File.separator)
       } else {
         super.visitLdcInsn(value)
       }

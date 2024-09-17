@@ -27,6 +27,7 @@ import com.google.common.collect.Table
 import com.google.common.collect.Tables
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import java.io.File
 import java.util.EnumMap
 
 class PseudolocaleGeneratorTest {
@@ -163,7 +164,7 @@ class PseudolocaleGeneratorTest {
         assertThat(size).isEqualTo(3)
         assertThat(getValue("test_color").value).isEqualTo("#ffffffff")
         assertThat(getValue("test_color_2").value).isEqualTo("#00000000")
-        assertThat(getValue("color_selector").value).isEqualTo("$resFolderRoot/color/color_selector.xml")
+        assertThat(getValue("color_selector").value).isEqualTo("$resFolderRoot${File.separator}color/color_selector.xml")
       }
 
       // DIMEN
