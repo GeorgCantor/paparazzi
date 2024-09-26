@@ -15,9 +15,14 @@
  */
 package app.cash.paparazzi.gradle
 
+import app.cash.paparazzi.gradle.instrumentation.Platform.Posix
+import app.cash.paparazzi.gradle.instrumentation.Platform.Windows
+import app.cash.paparazzi.gradle.instrumentation.ResourcesCompatVisitorFactory
 import app.cash.paparazzi.gradle.reporting.TestReport
 import app.cash.paparazzi.gradle.utils.artifactViewFor
 import app.cash.paparazzi.gradle.utils.relativize
+import com.android.build.api.instrumentation.FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS
+import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.DynamicFeatureAndroidComponentsExtension
@@ -44,6 +49,7 @@ import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
 import java.util.Locale
@@ -114,6 +120,21 @@ public class PaparazziPlugin @Inject constructor(
     extension.onVariants { variant ->
       val variantSlug = variant.name.capitalize(Locale.US)
       val testVariant = (variant as? HasUnitTest)?.unitTest ?: return@onVariants
+
+      val testInstrumentation = testVariant.instrumentation
+      testInstrumentation.transformClassesWith(
+        ResourcesCompatVisitorFactory::class.java,
+        InstrumentationScope.ALL
+      ) {
+        val os = DefaultNativePlatform.getCurrentOperatingSystem()
+        val platform = when {
+          os.isWindows -> Windows
+          else -> Posix
+        }
+        println("os: $os, platform: $platform")
+        it.platform.set(platform)
+      }
+      testInstrumentation.setAsmFramesComputationMode(COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS)
 
       val projectDirectory = project.layout.projectDirectory
       val buildDirectory = project.layout.buildDirectory
@@ -238,15 +259,15 @@ public class PaparazziPlugin @Inject constructor(
 
         val isVerifying = isVerifyRun.map {
           // We only want to run the our custom test reporter when verify task runs.
-          if (it) {
-            test.setTestReporter { testResultsProvider, reportDir ->
-              TestReport(
-                failureSnapshotDir = snapshotFailures.orNull?.asFile,
-                applicationId = variant.namespace.get(),
-                variantKey = variant.name
-              ).generateReport(testResultsProvider = testResultsProvider, reportDir = reportDir)
-            }
-          }
+//          if (it) {
+//            test.setTestReporter { testResultsProvider, reportDir ->
+//              TestReport(
+//                failureSnapshotDir = snapshotFailures.orNull?.asFile,
+//                applicationId = variant.namespace.get(),
+//                variantKey = variant.name
+//              ).generateReport(testResultsProvider = testResultsProvider, reportDir = reportDir)
+//            }
+//          }
 
           it
         }
